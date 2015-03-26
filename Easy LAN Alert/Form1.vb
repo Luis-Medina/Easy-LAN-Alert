@@ -155,6 +155,7 @@ Public Class Form1
             ServiceControl.Text = "Start Service"
         End If
 
+        Debug.WriteLine(NetworkNode.DEFAULT_MAC = "00-00-00-00-00-00")
     End Sub
 
     Private Sub DataGridView1_CellMouseUp(sender As Object, e As System.Windows.Forms.DataGridViewCellMouseEventArgs) Handles DataGridView1.CellMouseUp
@@ -298,12 +299,14 @@ Public Class Form1
         End If
     End Sub
 
+
     Private Sub UpdateDatabase_Click(sender As System.Object, e As System.EventArgs) Handles UpdateDatabase.Click
         Me.Cursor = Cursors.WaitCursor
         Try
             My.Computer.Network.DownloadFile("http://www.luismedinaweb.com/downloads/maclist.txt", "maclist.txt", String.Empty, String.Empty, True, 5000, True, FileIO.UICancelOption.ThrowException)
         Catch ex As Exception
-            MsgBox(ex.Message)
+            MsgBox(ex.Message, MsgBoxStyle.Critical)
+            Me.Cursor = Cursors.Default
             Exit Sub
         End Try
         Dim streamReader As New StreamReader("maclist.txt")

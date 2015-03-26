@@ -173,6 +173,7 @@ Public Class EasyLANAlertService
             SyncLock nodeList
                 nodeList.RemoveAll(Function(x) x.macAddress = NetworkNode.DEFAULT_MAC Or x.macAddress = "00:00:00:00:00:00")
                 nodeList.Sort(Function(x, y) Integer.Parse(x.ipAddress.Split(CType(".", Char))(3)).CompareTo(Integer.Parse(y.ipAddress.Split(CType(".", Char))(3))))
+                nodeList.RemoveAll(Function(x) x.macAddress = NetworkNode.DEFAULT_MAC Or x.macAddress = "00:00:00:00:00:00")
             End SyncLock
 
             Debug.WriteLine("Starting ARP Read")
@@ -250,7 +251,7 @@ Public Class EasyLANAlertService
         Dim myStreamReader As StreamReader = myProcess.StandardOutput
         While Not myStreamReader.EndOfStream
             Dim myString As String = myStreamReader.ReadLine()
-            If myString.StartsWith("Interface") And myString.Contains("192.168.1.") Then
+            If myString.StartsWith("Interface") And myString.Contains(ipAddress) Then
                 While Not myStreamReader.EndOfStream
                     myString = myStreamReader.ReadLine
                     If myString.StartsWith("Interface") Then
@@ -259,18 +260,19 @@ Public Class EasyLANAlertService
 
                     Dim macAddr As String = Nothing
                     Dim ipAddr As String = Nothing
-                    For Each match As Match In Regex.Matches(myString, macRegex, RegexOptions.IgnoreCase)
-                        macAddr = match.Value.Trim
-                    Next
-                    For Each match As Match In Regex.Matches(myString, ipRegex, RegexOptions.IgnoreCase)
-                        ipAddr = match.Value.Trim
-                    Next
-
+                    Dim result = Regex.Match(myString, macRegex, RegexOptions.IgnoreCase)
+                    If result IsNot Nothing Then
+                        macAddr = result.Value.Trim.ToUpper()
+                    End If
+                    result = Regex.Match(myString, ipRegex, RegexOptions.IgnoreCase)
+                    If result IsNot Nothing Then
+                        ipAddr = result.Value.Trim
+                    End If
                     If macAddr IsNot Nothing And ipAddr IsNot Nothing Then
                         Try
                             Dim existingNode = nodeList.First(Function(x) x.ipAddress = ipAddr)
                             If existingNode IsNot Nothing Then
-                                existingNode.macAddress = macAddr.ToUpper
+                                existingNode.macAddress = macAddr
                             End If
                         Catch ex As Exception
                         End Try
@@ -340,7 +342,6 @@ Public Class EasyLANAlertService
         Catch ex As Exception
             Debug.WriteLine("Stream already closed")
         End Try
-
 
         myProcess.WaitForExit()
         myProcess.Close()

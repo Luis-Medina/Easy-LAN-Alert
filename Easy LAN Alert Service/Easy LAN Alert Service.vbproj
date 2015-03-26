@@ -146,7 +146,7 @@
     <ProjectReference Include="..\Easy LAN Alert DLL\Easy LAN Alert DLL.vbproj">
       <Project>{F0A3A506-290A-4C95-A6C9-7BBB7B602383}</Project>
       <Name>Easy LAN Alert DLL</Name>
-      <Private>False</Private>
+      <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
